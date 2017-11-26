@@ -3,14 +3,16 @@ const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
 const {posts, comments} = require('./routes');
-const request = require('supertest');
-
 
 // Instantiations
 const app = express(); 
 
 // Configurations
-app.set('port', process.env.PORT || 3000);
+if (process.env.NODE_ENV === 'testing') {
+  app.set('port', process.env.PORT || 3001);
+} else {
+  app.set('port', process.env.PORT || 3000);
+}
 
 // Middleware
 app.use(logger('dev'));
@@ -50,17 +52,9 @@ app.delete('/posts/:postId/comments/:commentId', comments.removeComment)
 // Error handlers
 // TODO
 
-// Tests
-let store = require('./store');
-const test = request(app);
-
-//example test for: curl "http://localhost:3000/posts"
-test.get('/posts') 
-  .expect('Content-Type', /json/)
-  .expect(200, store.posts)
-  .end(function(err, res) {
-    if (err) throw err;
-  });
-
 // Bootup
-app.listen(app.get('port'), () => console.log(`server listening at port: ${app.get('port')}`));
+app.listen(app.get('port'), 
+  () => console.log(`server listening at port: ${app.get('port')}`));
+
+// Module exports 
+module.exports = app; 
