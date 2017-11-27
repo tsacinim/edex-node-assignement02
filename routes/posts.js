@@ -14,7 +14,9 @@ module.exports = {
   // curl "http://localhost:3000/posts/1"
   getOnePost(req, res) {
     const id = req.params.postId;
-    // send back the updated post 
+    // check if post exists
+    if (!store.posts[id]) throw new Error('Not found')
+    // send back the post 
     res.send(store.posts[id]);
   },
 
@@ -33,6 +35,8 @@ module.exports = {
   // curl -H 'Content-Type: application/json' -X PUT -d '{"name": "Top 10 ES6 Features Every Developer Must Know", "url":"http://webapplog.com/es6", "text": ""}' "http://localhost:3000/posts/0"
   updatePost(req, res) {
     const id = req.params.postId;
+    // check if post exists
+    if (!store.posts[id]) throw new Error('Not found')
     // save changes in memory
     store.posts[id] = req.body;
     // persist changes to disk
@@ -45,8 +49,12 @@ module.exports = {
   // curl -X DELETE "http://localhost:3000/posts/0" 
   removePost(req, res) {
     const id = req.params.postId;
+    // check if post exists
+    if (!store.posts[id]) throw new Error('Not found')    
     // save changes in memory
-    store.posts[id] = {name: 'deleted'};
+    store.posts[id] = {
+      name: `deleted`
+    };
     // persist changes to disk
     fs.writeFileSync('./data.json', JSON.stringify(store,null,2));  
     // send back the deleted post 

@@ -7,6 +7,8 @@ module.exports = {
   // curl "http://localhost:3000/posts/:postId/comments"
   getComments(req, res) {
     const id = req.params.postId
+    // check if post exists
+    if (!store.posts[id]) throw new Error('Not found')    
     // respond with the list of comments 
     res.send(store.posts[id].comments)
   }, 
@@ -16,6 +18,8 @@ module.exports = {
   getOneComment(req, res) {
     const postId = req.params.postId;
     const commentId = req.params.commentId;
+    // check if post & comment exist
+    if (!store.posts[postId].comments[commentId]) throw new Error('Not found')    
     // send back the updated post 
     res.send(store.posts[postId].comments[commentId]);
   },
@@ -24,6 +28,9 @@ module.exports = {
   // curl -H "Content-Type: application/json" -X POST -d '{"text": "boom!"}'  "http://localhost:3000/posts/:postId/comments"   
   addComment(req, res) {
     const id = req.params.postId;
+    // check if post exists
+    if (!store.posts[id]) throw new Error('Not found')
+    // if no comments add a comments list
     if(!store.posts[id].comments) {
       store.posts[id].comments = [];
     }
@@ -40,6 +47,8 @@ module.exports = {
   updateComment(req, res) {
     const postId = req.params.postId;
     const commentId = req.params.commentId;
+    // check if post & comment exist
+    if (!store.posts[postId].comments[commentId]) throw new Error('Not found')    
     // save changes in memory
     store.posts[postId].comments[commentId] = req.body;
     // persist changes to disk
@@ -53,8 +62,13 @@ module.exports = {
   removeComment(req, res) {
     const postId = req.params.postId;
     const commentId = req.params.commentId;
+    // check if post & comment exist
+    if (!store.posts[postId].comments[commentId]) throw new Error('Not found')    
     // save changes in memory
-    store.posts[postId].comments[commentId] = {text: 'deleted'}
+    store.posts[postId].comments[commentId] = {
+      // text: `deleted at ${new Date().getDate()}`
+      text: `deleted`
+    }
     // persist changes to disk
     fs.writeFileSync('./data.json', JSON.stringify(store,null,2));  
     // send back the deleted post 
