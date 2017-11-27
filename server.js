@@ -30,7 +30,7 @@ app.use(middleware)
 // Routes
 // GET / index/home route
 app.get('/', (req, res)=>{
-  res.send('hello world');
+  res.send('Hello world! \n try a route, for example: \n /posts');
 });
 
 // GET and POST /posts
@@ -50,7 +50,13 @@ app.put('/posts/:postId/comments/:commentId', comments.updateComment)
 app.delete('/posts/:postId/comments/:commentId', comments.removeComment)
 
 // Error handlers
-// TODO
+app.get('*', function(req, res){ // all other routes
+  res.status(404).send('Not found');
+});
+app.use(function (err, req, res, next) { // catch all thrown errors
+  console.error(err.stack)
+  res.status(500).send('Something broke!')
+})
 
 // Bootup
 app.listen(app.get('port'), 

@@ -70,20 +70,22 @@ let expectedStore = {
 test.get('/posts') 
   .expect('Content-Type', /json/)
   .expect(200) 
+  // .expect(200, defaultStore.posts) 
   .end(function(err, res) {
     if (err) throw err;
-    console.log('Testing OK: got a 200 response code from route: GET /posts')
+    console.log('OK: got a 200 from: GET /posts')
   });
 
 //example test for: curl "http://localhost:3000/posts/0"  
 test.get('/posts/0') 
   .expect('Content-Type', /json/)
-  .expect(200) // .expect(200, require('./store').posts[0])
+  .expect(200, defaultStore.posts[0])
   .end(function(err, res) {
     if (err) throw err;
-    console.log('Testing OK: got a 200 response code from route: GET /posts/0')
+    console.log('OK: got a 200 from: GET /posts/0')
   });
 
+//example test for: curl -X POST "http://localhost:3000/posts ..."  
 test.post('/posts')
   .send({
     "name": "Top 10 ES6 Features", 
@@ -92,28 +94,28 @@ test.post('/posts')
   })
   .set('Content-Type', 'application/json')
   .expect('Content-Type', /json/)
-  .expect(200) 
+  .expect(200, {"id": defaultStore.posts.length}) // added at index 1
   .end(function(err, res) {
     if (err) throw err;
-    console.log('Testing OK: got a 200 response code from route: POST /posts')
+    console.log('OK: got a 200 from: POST /posts')
   });
 
 //example test for: curl "http://localhost:3000/posts/0/comments"
 test.get('/posts/0/comments') 
   .expect('Content-Type', /json/)
-  .expect(200) 
+  .expect(200, defaultStore.posts[0].comments) 
   .end(function(err, res) {
     if (err) throw err;
-    console.log('Testing OK: got a 200 response code from route: GET /posts/0/comments')
+    console.log('OK: got a 200 from: GET /posts/0/comments')
   });
   
 //example test for: curl "http://localhost:3000/posts/0/comments/0"
 test.get('/posts/0/comments/0') 
   .expect('Content-Type', /json/)
-  .expect(200) 
+  .expect(200, defaultStore.posts[0].comments[0]) 
   .end(function(err, res) {
     if (err) throw err;
-    console.log('Testing OK: got a 200 response code from route: GET /posts/0/comments/0')
+    console.log('OK: got a 200 from: GET /posts/0/comments/0')
   });
 
 test.post('/posts/1/comments')
@@ -122,10 +124,10 @@ test.post('/posts/1/comments')
   })
   .set('Content-Type', 'application/json')
   .expect('Content-Type', /json/)
-  .expect(200) 
+  .expect(200, {id: 0}) // added at index 0 (new list created)
   .end(function(err, res) {
     if (err) throw err;
-    console.log('Testing OK: got a 200 response code from route: POST /posts/1/comments')
+    console.log('OK: got a 200 from: POST /posts/1/comments')
   });
 
 test.post('/posts/1/comments')
@@ -134,7 +136,7 @@ test.post('/posts/1/comments')
   })
   .set('Content-Type', 'application/json')
   .expect('Content-Type', /json/)
-  .expect(200) 
+  .expect(200, {id: 1}) // added at index 1 
   .end(function(err, res) {
     if (err) throw err;
   });
@@ -145,7 +147,7 @@ test.post('/posts/1/comments')
   })
   .set('Content-Type', 'application/json')
   .expect('Content-Type', /json/)
-  .expect(200) 
+  .expect(200, {id: 2}) // added at index 2
   .end(function(err, res) {
     if (err) throw err;
   });
@@ -156,18 +158,18 @@ test.put('/posts/1/comments/1')
   })
   .set('Content-Type', 'application/json')
   .expect('Content-Type', /json/)
-  .expect(200) 
+  .expect(200, expectedStore.posts[1].comments[1]) 
   .end(function(err, res) {
     if (err) throw err;
-    console.log('Testing OK: got a 200 response code from route: PUT /posts/1/comments/1')
+    console.log('OK: got a 200 from: PUT /posts/1/comments/1')
   });
 
 test.delete('/posts/1/comments/2')
   .expect('Content-Type', /json/)
-  .expect(200) // 
+  .expect(200, expectedStore.posts[1].comments[2]) 
   .end(function(err, res) {
     if (err) throw err;
-    console.log('Testing OK: got a 200 response code from route: DELETE /posts/1/comment/2')
+    console.log('OK: got a 200 from: DELETE /posts/1/comment/2')
   });
 
 test.post('/posts')
@@ -178,7 +180,7 @@ test.post('/posts')
   })
   .set('Content-Type', 'application/json')
   .expect('Content-Type', /json/)
-  .expect(200) 
+  .expect(200, {id: 2}) // added at index 2 
   .end(function(err, res) {
     if (err) throw err;
   });
@@ -191,7 +193,7 @@ test.post('/posts')
   })
   .set('Content-Type', 'application/json')
   .expect('Content-Type', /json/)
-  .expect(200) 
+  .expect(200, {id: 3}) // added at index 3 
   .end(function(err, res) {
     if (err) throw err;
   });
@@ -204,19 +206,44 @@ test.put('/posts/2')
   })
   .set('Content-Type', 'application/json')
   .expect('Content-Type', /json/)
-  .expect(200) 
+  .expect(200, expectedStore.posts[2]) 
   .end(function(err, res) {
     if (err) throw err;
-    console.log('Testing OK: got a 200 response code from route: PUT /posts/2')
+    console.log('OK: got a 200 from: PUT /posts/2')
   });
-
+  
 test.delete('/posts/3')
   .expect('Content-Type', /json/)
-  .expect(200) // 
+  .expect(200, expectedStore.posts[3]) 
   .end(function(err, res) {
     if (err) throw err;
-    console.log('Testing OK: got a 200 response code from route: DELETE /posts/3')
-    
+    console.log('OK: got a 200 from: DELETE /posts/3')
+  });
+
+// example test for missing route parameter  
+test.put('/posts/666')
+  .send({
+    "name": "Updating a nonexisting post should fail"
+  })
+  .set('Content-Type', 'application/json')
+  .expect('Content-Type', /text/)
+  .expect(500, 'Something broke!') 
+  // .expect(200, defaultStore.posts) 
+  .end(function(err, res) {
+    if (err) throw err;
+    console.log('OK: got a 500 from: GET /posts/666');
+  });
+
+// example test for missing route path  
+test.get('/nope') 
+  .expect('Content-Type', /text/)
+  .expect(404, "Not found") 
+  // .expect(200, defaultStore.posts) 
+  .end(function(err, res) {
+    if (err) throw err;
+    console.log('OK: got a 404 from: GET /nope');
+
+    // final check of store state
     let actualStore = require('./store');
     
     // console.log(JSON.stringify(expectedStore))
@@ -226,7 +253,7 @@ test.delete('/posts/3')
 
     console.log('All Tests OK')
     
-    // reset the test data store to default value
+    // reset the data store to default value
     fs.writeFileSync('./data.json', JSON.stringify(defaultStore,null,2));
     process.exit(0)
   });
