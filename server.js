@@ -6,6 +6,7 @@ const {posts, comments} = require('./routes');
 
 // Instantiations
 const app = express(); 
+let store = require('./store');
 
 // Configurations
 if (process.env.NODE_ENV === 'testing') {
@@ -18,14 +19,15 @@ if (process.env.NODE_ENV === 'testing') {
 app.use(logger('dev'));
 app.use(bodyParser.json());
 
-// example custom middleware 
-const middleware = (request, response, next) => {
-  // Modify request or response
+// custom middleware to add the store to the request object
+const middlewareAddStore = (request, response, next) => {
+  // add store to request
+  request.store = store;
+  console.log('store added to request');
   // Execute the callback when done
-  console.log('custom middleware applyed')
-  next()
+  next();
 }
-app.use(middleware)
+app.use(middlewareAddStore);
 
 // Routes
 // GET / index/home route

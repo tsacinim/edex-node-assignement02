@@ -1,5 +1,4 @@
 const fs = require('fs');
-let store = require('../store');
 
 // routes to: /posts/:postId/comments
 module.exports = {
@@ -8,9 +7,9 @@ module.exports = {
   getComments(req, res) {
     const id = req.params.postId
     // check if post exists
-    if (!store.posts[id]) throw new Error('Not found')    
+    if (!req.store.posts[id]) throw new Error('Not found')    
     // respond with the list of comments 
-    res.send(store.posts[id].comments)
+    res.send(req.store.posts[id].comments)
   }, 
 
   //gets one comment by list index
@@ -19,9 +18,9 @@ module.exports = {
     const postId = req.params.postId;
     const commentId = req.params.commentId;
     // check if post & comment exist
-    if (!store.posts[postId].comments[commentId]) throw new Error('Not found')    
-    // send back the updated post 
-    res.send(store.posts[postId].comments[commentId]);
+    if (!req.store.posts[postId].comments[commentId]) throw new Error('Not found')    
+    // send back the requested comment 
+    res.send(req.store.posts[postId].comments[commentId]);
   },
 
   //posts comment data
@@ -29,17 +28,17 @@ module.exports = {
   addComment(req, res) {
     const id = req.params.postId;
     // check if post exists
-    if (!store.posts[id]) throw new Error('Not found')
+    if (!req.store.posts[id]) throw new Error('Not found')
     // if no comments add a comments list
-    if(!store.posts[id].comments) {
-      store.posts[id].comments = [];
+    if(!req.store.posts[id].comments) {
+      req.store.posts[id].comments = [];
     }
     // save changes in memory
-    store.posts[id].comments.push(req.body);
+    req.store.posts[id].comments.push(req.body);
     // persist changes to disk
-    fs.writeFileSync('./data.json', JSON.stringify(store,null,2));  
+    fs.writeFileSync('./data.json', JSON.stringify(req.store,null,2));  
     // send back id (index in list of comments) 
-    res.send({id: store.posts[id].comments.length - 1});
+    res.send({id: req.store.posts[id].comments.length - 1});
   },
   
   //updates comment data at specific id
@@ -48,13 +47,13 @@ module.exports = {
     const postId = req.params.postId;
     const commentId = req.params.commentId;
     // check if post & comment exist
-    if (!store.posts[postId].comments[commentId]) throw new Error('Not found')    
+    if (!req.store.posts[postId].comments[commentId]) throw new Error('Not found')    
     // save changes in memory
-    store.posts[postId].comments[commentId] = req.body;
+    req.store.posts[postId].comments[commentId] = req.body;
     // persist changes to disk
-    fs.writeFileSync('./data.json', JSON.stringify(store,null,2));  
+    fs.writeFileSync('./data.json', JSON.stringify(req.store,null,2));  
     // send back the updated post 
-    res.send(store.posts[postId].comments[commentId]);
+    res.send(req.store.posts[postId].comments[commentId]);
   },
   
   //deletes comment data at specific id
@@ -63,15 +62,15 @@ module.exports = {
     const postId = req.params.postId;
     const commentId = req.params.commentId;
     // check if post & comment exist
-    if (!store.posts[postId].comments[commentId]) throw new Error('Not found')    
+    if (!req.store.posts[postId].comments[commentId]) throw new Error('Not found')    
     // save changes in memory
-    store.posts[postId].comments[commentId] = {
+    req.store.posts[postId].comments[commentId] = {
       // text: `deleted at ${new Date().getDate()}`
       text: `deleted`
     }
     // persist changes to disk
-    fs.writeFileSync('./data.json', JSON.stringify(store,null,2));  
+    fs.writeFileSync('./data.json', JSON.stringify(req.store,null,2));  
     // send back the deleted post 
-    res.send(store.posts[postId].comments[commentId]); 
+    res.send(req.store.posts[postId].comments[commentId]); 
   }  
 }
